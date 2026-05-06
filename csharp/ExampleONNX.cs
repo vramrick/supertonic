@@ -10,11 +10,11 @@ namespace Supertonic
         class Args
         {
             public bool UseGpu { get; set; } = false;
-            public string OnnxDir { get; set; } = "assets/onnx";
-            public int TotalStep { get; set; } = 5;
+            public string OnnxDir { get; set; } = "../assets/onnx";
+            public int TotalStep { get; set; } = 8;
             public float Speed { get; set; } = 1.05f;
             public int NTest { get; set; } = 4;
-            public List<string> VoiceStyle { get; set; } = new List<string> { "assets/voice_styles/M1.json" };
+            public List<string> VoiceStyle { get; set; } = new List<string> { "../assets/voice_styles/M1.json" };
             public List<string> Text { get; set; } = new List<string> 
             { 
                 "This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen." 

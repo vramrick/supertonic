@@ -4,7 +4,7 @@ Node.js implementation for TTS inference. Uses ONNX Runtime to generate speech f
 
 ## 📰 Update News
 
-**2026.01.06** - 🎉 **Supertonic 2** released with multilingual support! Now supports English (`en`), Korean (`ko`), Spanish (`es`), Portuguese (`pt`), and French (`fr`). [Demo](https://huggingface.co/spaces/Supertone/supertonic-2) | [Models](https://huggingface.co/Supertone/supertonic-2)
+**2026.04.29** - 🎉 **Supertonic 3** released with 31-language support, improved reading accuracy, and v2-compatible public ONNX assets. [Demo](https://huggingface.co/spaces/Supertone/supertonic-3) | [Models](https://huggingface.co/Supertone/supertonic-3)
 
 **2025.12.10** - Added [6 new voice styles](https://huggingface.co/Supertone/supertonic/tree/b10dbaf18b316159be75b34d24f740008fddd381) (M3, M4, M5, F3, F4, F5). See [Voices](https://supertone-inc.github.io/supertonic-py/voices/) for details
 
@@ -33,7 +33,7 @@ npm install
 ### Example 1: Default Inference
 Run inference with default settings:
 ```bash
-npm start
+node example_onnx.js
 ```
 
 Or:
@@ -42,17 +42,17 @@ node example_onnx.js
 ```
 
 This will use:
-- Voice style: `assets/voice_styles/M1.json`
+- Voice style: `../assets/voice_styles/M1.json`
 - Text: "This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen."
 - Output directory: `results/`
-- Total steps: 5
+- Total steps: 8
 - Number of generations: 4
 
 ### Example 2: Batch Inference
 Process multiple voice styles and texts at once:
 ```bash
 node example_onnx.js \
-  --voice-style "assets/voice_styles/M1.json,assets/voice_styles/F1.json" \
+  --voice-style "../assets/voice_styles/M1.json,../assets/voice_styles/F1.json" \
   --text "The sun sets behind the mountains, painting the sky in shades of pink and orange.|오늘 아침에 공원을 산책했는데, 새소리와 바람 소리가 너무 좋아서 한참을 멈춰 서서 들었어요." \
   --lang "en,ko" \
   --batch
@@ -70,19 +70,19 @@ Increase denoising steps for better quality:
 ```bash
 node example_onnx.js \
   --total-step 10 \
-  --voice-style "assets/voice_styles/M1.json" \
+  --voice-style "../assets/voice_styles/M1.json" \
   --text "Increasing the number of denoising steps improves the output's fidelity and overall quality."
 ```
 
 This will:
-- Use 10 denoising steps instead of the default 5
+- Use 10 denoising steps instead of the default 8
 - Produce higher quality output at the cost of slower inference
 
 ### Example 4: Long-Form Inference
 For long texts, the system automatically chunks the text into manageable segments and generates a single audio file:
 ```bash
 node example_onnx.js \
-  --voice-style "assets/voice_styles/M1.json" \
+  --voice-style "../assets/voice_styles/M1.json" \
   --text "Once upon a time, in a small village nestled between rolling hills, there lived a young artist named Clara. Every morning, she would wake up before dawn to capture the first light of day. The golden rays streaming through her window inspired countless paintings. Her work was known throughout the region for its vibrant colors and emotional depth. People from far and wide came to see her gallery, and many said her paintings could tell stories that words never could."
 ```
 
@@ -99,20 +99,20 @@ This will:
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `--use-gpu` | flag | False | Use GPU for inference (not supported yet) |
-| `--onnx-dir` | str | `assets/onnx` | Path to ONNX model directory |
-| `--total-step` | int | 5 | Number of denoising steps (higher = better quality, slower) |
+| `--onnx-dir` | str | `../assets/onnx` | Path to ONNX model directory |
+| `--total-step` | int | 8 | Number of denoising steps (higher = better quality, slower) |
 | `--speed` | float | 1.05 | Speech speed factor (higher = faster, lower = slower) |
 | `--n-test` | int | 4 | Number of times to generate each sample |
-| `--voice-style` | str+ | `assets/voice_styles/M1.json` | Voice style file path(s). Separate multiple files with commas |
+| `--voice-style` | str+ | `../assets/voice_styles/M1.json` | Voice style file path(s). Separate multiple files with commas |
 | `--text` | str+ | (long default text) | Text(s) to synthesize. Separate multiple texts with pipes |
-| `--lang` | str+ | `en` | Language(s) for text(s): `en`, `ko`, `es`, `pt`, `fr`. Separate multiple with commas |
+| `--lang` | str+ | `en` | Language(s) for text(s); see the main README for all 31 codes. Separate multiple with commas |
 | `--save-dir` | str | `results` | Output directory |
 | `--batch` | flag | False | Enable batch mode (disables automatic text chunking) |
 
 ## Notes
 
 - **Batch Processing**: The number of voice style files must match the number of texts. Use commas to separate files and pipes to separate texts
-- **Multilingual Support**: Use `--lang` to specify language(s). Available: `en` (English), `ko` (Korean), `es` (Spanish), `pt` (Portuguese), `fr` (French)
+- **Multilingual Support**: Use `--lang` to specify language(s). Available: 31 languages; see the main README for the full list
 - **Long-Form Inference**: Without `--batch` flag, long texts are automatically chunked and combined into a single audio file with natural pauses
 - **Quality vs Speed**: Higher `--total-step` values produce better quality but take longer
 - **GPU Support**: GPU mode is not supported yet

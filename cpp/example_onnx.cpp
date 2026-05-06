@@ -8,11 +8,11 @@
 namespace fs = std::filesystem;
 
 struct Args {
-    std::string onnx_dir = "../assets/onnx";
-    int total_step = 5;
+    std::string onnx_dir = "../../assets/onnx";
+    int total_step = 8;
     float speed = 1.05f;
     int n_test = 4;
-    std::vector<std::string> voice_style = {"../assets/voice_styles/M1.json"};
+    std::vector<std::string> voice_style = {"../../assets/voice_styles/M1.json"};
     std::vector<std::string> text = {
         "This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen."
     };

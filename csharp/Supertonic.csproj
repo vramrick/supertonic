@@ -5,6 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>13.0</LangVersion>
     <Nullable>enable</Nullable>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,5 +14,4 @@
   </ItemGroup>
 
 </Project>
-
 

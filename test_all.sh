@@ -4,9 +4,15 @@
 # This script runs inference tests for all supported languages except web
 
 set -e  # Exit on error
+set -o pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
+
+export UV_CACHE_DIR="${UV_CACHE_DIR:-$SCRIPT_DIR/.uv-cache}"
+export CLANG_MODULE_CACHE_PATH="${CLANG_MODULE_CACHE_PATH:-$SCRIPT_DIR/.clang-module-cache}"
+SWIFT_HOME="${SWIFT_HOME:-$SCRIPT_DIR/.swift-home}"
+mkdir -p "$UV_CACHE_DIR" "$CLANG_MODULE_CACHE_PATH" "$SWIFT_HOME"
 
 echo "=================================="
 echo "Supertonic - Testing All Examples"
@@ -110,6 +116,28 @@ NC='\033[0m' # No Color
 declare -a PASSED=()
 declare -a FAILED=()
 
+# Local toolchain fallbacks for Homebrew keg-only installs.
+DOTNET_CMD="${DOTNET_CMD:-dotnet}"
+if ! "$DOTNET_CMD" --list-runtimes 2>/dev/null | grep -q "Microsoft.NETCore.App 9\\."; then
+    if [ -x "/opt/homebrew/opt/dotnet@9/bin/dotnet" ]; then
+        DOTNET_CMD="/opt/homebrew/opt/dotnet@9/bin/dotnet"
+        export DOTNET_ROOT="${DOTNET_ROOT:-/opt/homebrew/opt/dotnet@9/libexec}"
+    elif [ -x "/usr/local/opt/dotnet@9/bin/dotnet" ]; then
+        DOTNET_CMD="/usr/local/opt/dotnet@9/bin/dotnet"
+        export DOTNET_ROOT="${DOTNET_ROOT:-/usr/local/opt/dotnet@9/libexec}"
+    fi
+fi
+
+if ! javac -version >/dev/null 2>&1; then
+    if [ -x "/opt/homebrew/opt/openjdk@17/bin/javac" ]; then
+        export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+        export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+    elif [ -x "/usr/local/opt/openjdk@17/bin/javac" ]; then
+        export JAVA_HOME="/usr/local/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+        export PATH="/usr/local/opt/openjdk@17/bin:$PATH"
+    fi
+fi
+
 # Helper function to show statistics
 show_stats() {
     local name=$1
@@ -181,10 +209,10 @@ if [ "$TEST_DEFAULT" = true ]; then
     run_test "Python (default)" "py" "uv run example_onnx.py"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "Python (batch)" "py" "uv run example_onnx.py --batch --voice-style $BATCH_VOICE_STYLE_1 $BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1' '$BATCH_TEXT_2' --lang $BATCH_LANG_1 $BATCH_LANG_2"
+    run_test "Python (batch)" "py" "uv run example_onnx.py --batch --voice-style ../$BATCH_VOICE_STYLE_1 ../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1' '$BATCH_TEXT_2' --lang $BATCH_LANG_1 $BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "Python (long-form)" "py" "uv run example_onnx.py --voice-style $LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
+    run_test "Python (long-form)" "py" "uv run example_onnx.py --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -197,10 +225,10 @@ if [ "$TEST_DEFAULT" = true ]; then
     run_test "JavaScript (default)" "nodejs" "node example_onnx.js"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "JavaScript (batch)" "nodejs" "node example_onnx.js --batch --voice-style $BATCH_VOICE_STYLE_1,$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
+    run_test "JavaScript (batch)" "nodejs" "node example_onnx.js --batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "JavaScript (long-form)" "nodejs" "node example_onnx.js --voice-style $LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
+    run_test "JavaScript (long-form)" "nodejs" "node example_onnx.js --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -209,15 +237,20 @@ fi
 echo -e "${YELLOW}Testing Go...${NC}"
 echo "Cleaning Go cache..."
 cd go && go clean && cd ..
-export ONNXRUNTIME_LIB_PATH=$(brew --prefix onnxruntime 2>/dev/null)/lib/libonnxruntime.dylib
+if [ -z "${ONNXRUNTIME_LIB_PATH:-}" ] && command -v brew >/dev/null 2>&1; then
+    ORT_PREFIX="$(brew --prefix onnxruntime 2>/dev/null || true)"
+    if [ -n "$ORT_PREFIX" ]; then
+        export ONNXRUNTIME_LIB_PATH="$ORT_PREFIX/lib/libonnxruntime.dylib"
+    fi
+fi
 if [ "$TEST_DEFAULT" = true ]; then
     run_test "Go (default)" "go" "go run example_onnx.go helper.go"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "Go (batch)" "go" "go run example_onnx.go helper.go --batch -voice-style $BATCH_VOICE_STYLE_1,$BATCH_VOICE_STYLE_2 -text '$BATCH_TEXT_1|$BATCH_TEXT_2' -lang $BATCH_LANG_1,$BATCH_LANG_2"
+    run_test "Go (batch)" "go" "go run example_onnx.go helper.go --batch -voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 -text '$BATCH_TEXT_1|$BATCH_TEXT_2' -lang $BATCH_LANG_1,$BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "Go (long-form)" "go" "go run example_onnx.go helper.go -voice-style $LONGFORM_VOICE_STYLE -text '$LONGFORM_TEXT'"
+    run_test "Go (long-form)" "go" "go run example_onnx.go helper.go -voice-style ../$LONGFORM_VOICE_STYLE -text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -230,10 +263,10 @@ if [ "$TEST_DEFAULT" = true ]; then
     run_test "Rust (default)" "rust" "cargo run --release"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "Rust (batch)" "rust" "cargo run --release -- --batch --voice-style $BATCH_VOICE_STYLE_1,$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
+    run_test "Rust (batch)" "rust" "cargo run --release -- --batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "Rust (long-form)" "rust" "cargo run --release -- --voice-style $LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
+    run_test "Rust (long-form)" "rust" "cargo run --release -- --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -241,15 +274,15 @@ fi
 # ====================================
 echo -e "${YELLOW}Testing C#...${NC}"
 echo "Building C# project..."
-cd csharp && dotnet clean && cd ..
+cd csharp && DOTNET_CLI_HOME="$SCRIPT_DIR/.dotnet" "$DOTNET_CMD" clean && cd ..
 if [ "$TEST_DEFAULT" = true ]; then
-    run_test "C# (default)" "csharp" "dotnet run --configuration Release"
+    run_test "C# (default)" "csharp" "DOTNET_CLI_HOME='$SCRIPT_DIR/.dotnet' '$DOTNET_CMD' run --configuration Release"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "C# (batch)" "csharp" "dotnet run --configuration Release -- --batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
+    run_test "C# (batch)" "csharp" "DOTNET_CLI_HOME='$SCRIPT_DIR/.dotnet' '$DOTNET_CMD' run --configuration Release -- --batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "C# (long-form)" "csharp" "dotnet run --configuration Release -- --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
+    run_test "C# (long-form)" "csharp" "DOTNET_CLI_HOME='$SCRIPT_DIR/.dotnet' '$DOTNET_CMD' run --configuration Release -- --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -257,15 +290,15 @@ fi
 # ====================================
 echo -e "${YELLOW}Testing Java...${NC}"
 echo "Building Java project..."
-cd java && mvn clean install -q && cd ..
+cd java && mvn -Dmaven.repo.local="$SCRIPT_DIR/.m2/repository" clean install -q && cd ..
 if [ "$TEST_DEFAULT" = true ]; then
-    run_test "Java (default)" "java" "mvn exec:java -q"
+    run_test "Java (default)" "java" "mvn -Dmaven.repo.local='$SCRIPT_DIR/.m2/repository' exec:java -q"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "Java (batch)" "java" "mvn exec:java -q -Dexec.args='--batch --voice-style $BATCH_VOICE_STYLE_1,$BATCH_VOICE_STYLE_2 --text \"$BATCH_TEXT_1|$BATCH_TEXT_2\" --lang $BATCH_LANG_1,$BATCH_LANG_2'"
+    run_test "Java (batch)" "java" "mvn -Dmaven.repo.local='$SCRIPT_DIR/.m2/repository' exec:java -q -Dexec.args='--batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text \"$BATCH_TEXT_1|$BATCH_TEXT_2\" --lang $BATCH_LANG_1,$BATCH_LANG_2'"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "Java (long-form)" "java" "mvn exec:java -q -Dexec.args='--voice-style $LONGFORM_VOICE_STYLE --text \"$LONGFORM_TEXT\"'"
+    run_test "Java (long-form)" "java" "mvn -Dmaven.repo.local='$SCRIPT_DIR/.m2/repository' exec:java -q -Dexec.args='--voice-style ../$LONGFORM_VOICE_STYLE --text \"$LONGFORM_TEXT\"'"
 fi
 
 # ====================================
@@ -273,15 +306,15 @@ fi
 # ====================================
 echo -e "${YELLOW}Testing Swift...${NC}"
 echo "Building Swift project..."
-cd swift && swift build -c release && cd ..
+cd swift && HOME="$SWIFT_HOME" CLANG_MODULE_CACHE_PATH="$CLANG_MODULE_CACHE_PATH" swift build --disable-sandbox -c release && cd ..
 if [ "$TEST_DEFAULT" = true ]; then
-    run_test "Swift (default)" "swift" ".build/release/example_onnx"
+    run_test "Swift (default)" "swift" "HOME='$SWIFT_HOME' CLANG_MODULE_CACHE_PATH='$CLANG_MODULE_CACHE_PATH' .build/release/example_onnx"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "Swift (batch)" "swift" ".build/release/example_onnx --batch --voice-style $BATCH_VOICE_STYLE_1,$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
+    run_test "Swift (batch)" "swift" "HOME='$SWIFT_HOME' CLANG_MODULE_CACHE_PATH='$CLANG_MODULE_CACHE_PATH' .build/release/example_onnx --batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "Swift (long-form)" "swift" ".build/release/example_onnx --voice-style $LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
+    run_test "Swift (long-form)" "swift" "HOME='$SWIFT_HOME' CLANG_MODULE_CACHE_PATH='$CLANG_MODULE_CACHE_PATH' .build/release/example_onnx --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -289,15 +322,15 @@ fi
 # ====================================
 echo -e "${YELLOW}Testing C++...${NC}"
 echo "Building C++ project..."
-cd cpp && mkdir -p build && cd build && cmake .. && make && cd ../..
+cmake -S cpp -B cpp/build && cmake --build cpp/build --config Release
 if [ "$TEST_DEFAULT" = true ]; then
     run_test "C++ (default)" "cpp/build" "./example_onnx"
 fi
 if [ "$TEST_BATCH" = true ]; then
-    run_test "C++ (batch)" "cpp/build" "./example_onnx --batch --voice-style ../$BATCH_VOICE_STYLE_1,../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
+    run_test "C++ (batch)" "cpp/build" "./example_onnx --batch --voice-style ../../$BATCH_VOICE_STYLE_1,../../$BATCH_VOICE_STYLE_2 --text '$BATCH_TEXT_1|$BATCH_TEXT_2' --lang $BATCH_LANG_1,$BATCH_LANG_2"
 fi
 if [ "$TEST_LONGFORM" = true ]; then
-    run_test "C++ (long-form)" "cpp/build" "./example_onnx --voice-style ../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
+    run_test "C++ (long-form)" "cpp/build" "./example_onnx --voice-style ../../$LONGFORM_VOICE_STYLE --text '$LONGFORM_TEXT'"
 fi
 
 # ====================================
@@ -327,4 +360,3 @@ else
     echo -e "${GREEN}All tests passed! 🎉${NC}"
     exit 0
 fi
-

@@ -4,7 +4,7 @@ import AVFoundation
 @MainActor
 final class TTSViewModel: ObservableObject {
     @Published var text: String = "This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen."
-    @Published var nfe: Double = 5
+    @Published var nfe: Double = 8
     @Published var voice: TTSService.Voice = .male
     @Published var language: TTSService.Language = .en
     @Published var isGenerating: Bool = false

@@ -1,13 +1,11 @@
-assets/*
-assets/.git
-assets/.gitignore
-assets/.gitattributes
+assets/
 
 *.onnx
 onnx
 
 # Output files
 results
+results_v3_sdk/
 
 # Python
 __pycache__
@@ -21,6 +19,11 @@ __pycache__
 venv/
 ENV/
 env/
+.dotnet/
+.m2/
+.uv-cache/
+.clang-module-cache/
+.swift-home/
 
 # Node.js
 node_modules/

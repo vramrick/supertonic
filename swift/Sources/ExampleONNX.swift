@@ -3,11 +3,11 @@ import OnnxRuntimeBindings
 
 struct Args {
     var useGpu: Bool = false
-    var onnxDir: String = "assets/onnx"
-    var totalStep: Int = 5
+    var onnxDir: String = "../assets/onnx"
+    var totalStep: Int = 8
     var speed: Float = 1.05
     var nTest: Int = 4
-    var voiceStyle: [String] = ["assets/voice_styles/M1.json"]
+    var voiceStyle: [String] = ["../assets/voice_styles/M1.json"]
     var text: [String] = ["This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen."]
     var lang: [String] = ["en"]
     var saveDir: String = "results"
@@ -32,7 +32,7 @@ func parseArgs() -> Args {
             }
         case "--total-step":
             if i + 1 < arguments.count {
-                args.totalStep = Int(arguments[i + 1]) ?? 5
+                args.totalStep = Int(arguments[i + 1]) ?? 8
                 i += 1
             }
         case "--speed":

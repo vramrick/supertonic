@@ -19,7 +19,7 @@ import (
 )
 
 // Available languages for multilingual TTS
-var AvailableLangs = []string{"en", "ko", "es", "pt", "fr"}
+var AvailableLangs = []string{"en", "ko", "ja", "ar", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "hi", "hr", "hu", "id", "it", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "vi"}
 
 // Config structures
 type SpecProcessorConfig struct {
@@ -801,7 +801,7 @@ func (tts *TextToSpeech) _infer(textList []string, langList []string, style *Sty
 // Call synthesizes speech from a single text with automatic chunking
 func (tts *TextToSpeech) Call(text string, lang string, style *Style, totalStep int, speed float32, silenceDuration float32) ([]float32, float32, error) {
 	maxLen := 300
-	if lang == "ko" {
+	if lang == "ko" || lang == "ja" {
 		maxLen = 120
 	}
 	chunks := chunkText(text, maxLen)
@@ -920,17 +920,28 @@ func LoadTextToSpeech(onnxDir string, useGPU bool, cfg Config) (*TextToSpeech, e
 func InitializeONNXRuntime() error {
 	libPath := os.Getenv("ONNXRUNTIME_LIB_PATH")
 	if libPath == "" {
-		libPath = "/usr/local/lib/libonnxruntime.so"
-		if _, err := os.Stat("/usr/local/lib/libonnxruntime.dylib"); err == nil {
-			libPath = "/usr/local/lib/libonnxruntime.dylib"
-		} else if _, err := os.Stat("/usr/lib/libonnxruntime.so"); err == nil {
-			libPath = "/usr/lib/libonnxruntime.so"
+		candidates := []string{
+			"/opt/homebrew/opt/onnxruntime/lib/libonnxruntime.dylib",
+			"/usr/local/opt/onnxruntime/lib/libonnxruntime.dylib",
+			"/opt/homebrew/lib/libonnxruntime.dylib",
+			"/usr/local/lib/libonnxruntime.dylib",
+			"/usr/local/lib/libonnxruntime.so",
+			"/usr/lib/libonnxruntime.so",
+		}
+		for _, candidate := range candidates {
+			if _, err := os.Stat(candidate); err == nil {
+				libPath = candidate
+				break
+			}
+		}
+		if libPath == "" {
+			libPath = "/usr/local/lib/libonnxruntime.so"
 		}
 	}
 	ort.SetSharedLibraryPath(libPath)
 
 	if err := ort.InitializeEnvironment(); err != nil {
-		return fmt.Errorf("failed to initialize ONNX Runtime: %w\nHint: Set ONNXRUNTIME_LIB_PATH environment variable", err)
+		return fmt.Errorf("failed to initialize ONNX Runtime: %w\nHint: install ONNX Runtime (macOS: brew install onnxruntime) or set ONNXRUNTIME_LIB_PATH", err)
 	}
 	return nil
 }

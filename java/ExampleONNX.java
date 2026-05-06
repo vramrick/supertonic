@@ -13,11 +13,11 @@ public class ExampleONNX {
      */
     static class Args {
         boolean useGpu = false;
-        String onnxDir = "assets/onnx";
-        int totalStep = 5;
+        String onnxDir = "../assets/onnx";
+        int totalStep = 8;
         float speed = 1.05f;
         int nTest = 4;
-        List<String> voiceStyle = Arrays.asList("assets/voice_styles/M1.json");
+        List<String> voiceStyle = Arrays.asList("../assets/voice_styles/M1.json");
         List<String> text = Arrays.asList(
             "This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen."
         );

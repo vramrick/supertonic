@@ -19,11 +19,11 @@ struct Args {
     use_gpu: bool,
 
     /// Path to ONNX model directory
-    #[arg(long, default_value = "assets/onnx")]
+    #[arg(long, default_value = "../assets/onnx")]
     onnx_dir: String,
 
     /// Number of denoising steps
-    #[arg(long, default_value = "5")]
+    #[arg(long, default_value = "8")]
     total_step: usize,
 
     /// Speech speed factor (higher = faster)
@@ -35,14 +35,14 @@ struct Args {
     n_test: usize,
 
     /// Voice style file path(s)
-    #[arg(long, value_delimiter = ',', default_values_t = vec!["assets/voice_styles/M1.json".to_string()])]
+    #[arg(long, value_delimiter = ',', default_values_t = vec!["../assets/voice_styles/M1.json".to_string()])]
     voice_style: Vec<String>,
 
     /// Text(s) to synthesize
     #[arg(long, value_delimiter = '|', default_values_t = vec!["This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen.".to_string()])]
     text: Vec<String>,
 
-    /// Language(s) for synthesis (en, ko, es, pt, fr)
+    /// Language(s) for synthesis; see the main README for all supported codes
     #[arg(long, value_delimiter = ',', default_values_t = vec!["en".to_string()])]
     lang: Vec<String>,
 

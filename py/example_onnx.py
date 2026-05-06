@@ -18,13 +18,13 @@ def parse_args():
     parser.add_argument(
         "--onnx-dir",
         type=str,
-        default="assets/onnx",
+        default="../assets/onnx",
         help="Path to ONNX model directory",
     )
 
     # Synthesis parameters
     parser.add_argument(
-        "--total-step", type=int, default=5, help="Number of denoising steps"
+        "--total-step", type=int, default=8, help="Number of denoising steps"
     )
     parser.add_argument(
         "--speed",
@@ -44,7 +44,7 @@ def parse_args():
         "--voice-style",
         type=str,
         nargs="+",
-        default=["assets/voice_styles/M1.json"],
+        default=["../assets/voice_styles/M1.json"],
         help="Voice style file path(s). Can specify multiple files for batch processing",
     )
     parser.add_argument(

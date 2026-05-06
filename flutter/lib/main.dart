@@ -14,7 +14,7 @@ class SupertonicApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Supertonic 2',
+      title: 'Supertonic 3',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -42,7 +42,7 @@ class _TTSPageState extends State<TTSPage> {
   bool _isLoading = false;
   bool _isGenerating = false;
   String _status = 'Not initialized';
-  int _totalSteps = 5;
+  int _totalSteps = 8;
   double _speed = 1.05;
   String _selectedLang = 'en';
   bool _isPlaying = false;
@@ -210,7 +210,7 @@ class _TTSPageState extends State<TTSPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Supertonic 2'),
+        title: const Text('Supertonic 3'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -323,13 +323,10 @@ class _TTSPageState extends State<TTSPage> {
                   child: DropdownButton<String>(
                     value: _selectedLang,
                     isExpanded: true,
-                    items: const [
-                      DropdownMenuItem(value: 'en', child: Text('English')),
-                      DropdownMenuItem(value: 'ko', child: Text('한국어')),
-                      DropdownMenuItem(value: 'es', child: Text('Español')),
-                      DropdownMenuItem(value: 'pt', child: Text('Português')),
-                      DropdownMenuItem(value: 'fr', child: Text('Français')),
-                    ],
+                    items: availableLangs
+                        .map((lang) =>
+                            DropdownMenuItem(value: lang, child: Text(lang)))
+                        .toList(),
                     onChanged: _isLoading || _isGenerating
                         ? null
                         : (value) => setState(() => _selectedLang = value!),

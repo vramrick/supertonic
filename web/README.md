@@ -4,7 +4,7 @@ This example demonstrates how to use Supertonic in a web browser using ONNX Runt
 
 ## 📰 Update News
 
-**2026.01.06** - 🎉 **Supertonic 2** released with multilingual support! Now supports English (`en`), Korean (`ko`), Spanish (`es`), Portuguese (`pt`), and French (`fr`). [Demo](https://huggingface.co/spaces/Supertone/supertonic-2) | [Models](https://huggingface.co/Supertone/supertonic-2)
+**2026.04.29** - 🎉 **Supertonic 3** released with 31-language support, improved reading accuracy, and v2-compatible public ONNX assets. [Demo](https://huggingface.co/spaces/Supertone/supertonic-3) | [Models](https://huggingface.co/Supertone/supertonic-3)
 
 **2025.12.10** - Added [6 new voice styles](https://huggingface.co/Supertone/supertonic/tree/b10dbaf18b316159be75b34d24f740008fddd381) (M3, M4, M5, F3, F4, F5). See [Voices](https://supertone-inc.github.io/supertonic-py/voices/) for details
 
@@ -20,7 +20,7 @@ This example demonstrates how to use Supertonic in a web browser using ONNX Runt
 
 - 🌐 Runs entirely in the browser (no server required for inference)
 - 🚀 WebGPU support with automatic fallback to WebAssembly
-- 🌍 Multilingual support: English (en), Korean (ko), Spanish (es), Portuguese (pt), French (fr)
+- 🌍 Multilingual support: 31 languages
 - ⚡ Pre-extracted voice styles for instant generation
 - 🎨 Modern, responsive UI
 - 🎭 Multiple voice style presets (5 Male, 5 Female)
@@ -58,14 +58,10 @@ This will start a local development server (usually at http://localhost:3000) an
    - **Male 1-5 (M1-M5)**: Male voice styles
    - **Female 1-5 (F1-F5)**: Female voice styles
 3. **Select Language**: Choose the language that matches your input text
-   - **English (en)**: Default language
-   - **한국어 (ko)**: Korean
-   - **Español (es)**: Spanish
-   - **Português (pt)**: Portuguese
-   - **Français (fr)**: French
+   - Supertonic 3 supports 31 language codes; see the main README for the full list.
 4. **Enter Text**: Type or paste the text you want to convert to speech
 5. **Adjust Settings** (optional):
-   - **Total Steps**: More steps = better quality but slower (default: 5)
+   - **Total Steps**: More steps = better quality but slower (default: 8)
 6. **Generate Speech**: Click the "Generate Speech" button
 7. **View Results**: 
    - See the full input text
@@ -75,7 +71,7 @@ This will start a local development server (usually at http://localhost:3000) an
 
 ## Multilingual Support
 
-Supertonic 2 supports multiple languages. Make sure to select the correct language for your input text to get the best results. The model will automatically handle text preprocessing and pronunciation for the selected language.
+Supertonic 3 supports 31 languages. Make sure to select the correct language for your input text to get the best results. The model will automatically handle text preprocessing and pronunciation for the selected language.
 
 ## Technical Details
 

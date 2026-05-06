@@ -28,17 +28,17 @@ func parseArgs() *Args {
 	args := &Args{}
 
 	flag.BoolVar(&args.useGPU, "use-gpu", false, "Use GPU for inference (default: CPU)")
-	flag.StringVar(&args.onnxDir, "onnx-dir", "assets/onnx", "Path to ONNX model directory")
-	flag.IntVar(&args.totalStep, "total-step", 5, "Number of denoising steps")
+	flag.StringVar(&args.onnxDir, "onnx-dir", "../assets/onnx", "Path to ONNX model directory")
+	flag.IntVar(&args.totalStep, "total-step", 8, "Number of denoising steps")
 	flag.Float64Var(&args.speed, "speed", 1.05, "Speech speed factor (higher = faster)")
 	flag.IntVar(&args.nTest, "n-test", 4, "Number of times to generate")
 	flag.StringVar(&args.saveDir, "save-dir", "results", "Output directory")
 	flag.BoolVar(&args.batch, "batch", false, "Enable batch mode (multiple text-style pairs)")
 
 	var voiceStyleStr, textStr, langStr string
-	flag.StringVar(&voiceStyleStr, "voice-style", "assets/voice_styles/M1.json", "Voice style file path(s), comma-separated")
+	flag.StringVar(&voiceStyleStr, "voice-style", "../assets/voice_styles/M1.json", "Voice style file path(s), comma-separated")
 	flag.StringVar(&textStr, "text", "This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen.", "Text(s) to synthesize, pipe-separated")
-	flag.StringVar(&langStr, "lang", "en", "Language(s) for synthesis, comma-separated (en, ko, es, pt, fr)")
+	flag.StringVar(&langStr, "lang", "en", "Language(s) for synthesis, comma-separated")
 
 	flag.Parse()
 
